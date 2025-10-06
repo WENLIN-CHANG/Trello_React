@@ -1,0 +1,33 @@
+{
+  "name": "trello_react",
+  "version": "1.0.0",
+  "description": "Trello",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "immer": "^10.0.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^27.0.0",
+    "vitest": "^3.2.4",
+    "vite": "^7.1.7",
+    "tailwindcss": "^4.1.13",
+    "@tailwindcss/vite": "^4.1.13"
+  },
+  "keywords": ["react", "trello", "drag-and-drop", "useReducer"],
+  "author": "",
+  "license": "ISC"
+}
