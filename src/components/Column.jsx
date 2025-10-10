@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { addCard, generateCardId, deleteColumn, updateColumn } from '../reducers/actions';
+import { addCard, generateCardId, deleteColumn, updateColumn, moveCard } from '../reducers/actions';
 import { useBoardDispatch } from '../context/BoardContext';
 import Card from './Card';
 
 const confirmAction = (message) => window.confirm(message);
 
-function Column({ columnId, column, cards }) {
+function Column({ columnId, column, cards, nextColumnId }) {
   const dispatch = useBoardDispatch();
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -35,6 +35,28 @@ function Column({ columnId, column, cards }) {
   const handleDeleteColumn = () => {
     if (confirmAction(`確定要刪除「${column.title}」嗎？這會刪除所有卡片。`)) {
       dispatch(deleteColumn(columnId));
+    }
+  };
+
+  // 移動卡片邏輯
+  const handleMoveCardUp = (cardId, currentIndex) => {
+    if (currentIndex > 0) {
+      // 往上移一格
+      dispatch(moveCard(cardId, columnId, currentIndex - 1));
+    }
+  };
+
+  const handleMoveCardDown = (cardId, currentIndex) => {
+    if (currentIndex < cards.length - 1) {
+      // 往下移一格
+      dispatch(moveCard(cardId, columnId, currentIndex + 1));
+    }
+  };
+
+  const handleMoveCardToNext = (cardId) => {
+    if (nextColumnId) {
+      // 移到下一欄的第 0 個位置
+      dispatch(moveCard(cardId, nextColumnId, 0));
     }
   };
 
@@ -76,7 +98,7 @@ function Column({ columnId, column, cards }) {
       </div>
 
       <div className="space-y-2 mb-4">
-        {cards.map((card) => {
+        {cards.map((card, index) => {
           if (!card?.id) {
             console.error('Card missing id:', card);
             return null;
@@ -88,6 +110,12 @@ function Column({ columnId, column, cards }) {
               cardId={card.id}
               card={card}
               columnId={columnId}
+              canMoveUp={index > 0}
+              canMoveDown={index < cards.length - 1}
+              canMoveNext={!!nextColumnId}
+              onMoveUp={() => handleMoveCardUp(card.id, index)}
+              onMoveDown={() => handleMoveCardDown(card.id, index)}
+              onMoveNext={() => handleMoveCardToNext(card.id)}
             />
           );
         })}

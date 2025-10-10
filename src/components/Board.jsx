@@ -10,7 +10,7 @@ function Board() {
   return (
     <BoardProvider dispatch={dispatch}>
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {state.columns.allIds.map((columnId) => {
+        {state.columns.allIds.map((columnId, columnIndex) => {
           const column = state.columns.byId[columnId];
 
           const cards = column.cardIds
@@ -25,12 +25,16 @@ function Board() {
             })
             .filter(Boolean);
 
+          // 計算下一欄的 ID
+          const nextColumnId = state.columns.allIds[columnIndex + 1] || null;
+
           return (
             <Column
               key={columnId}
               columnId={columnId}
               column={column}
               cards={cards}
+              nextColumnId={nextColumnId}
             />
           );
         })}
