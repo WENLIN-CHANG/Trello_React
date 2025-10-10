@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { addCard, generateCardId, deleteColumn, updateColumn, moveCard } from '../reducers/actions';
 import { useBoardDispatch } from '../context/BoardContext';
 import Card from './Card';
@@ -41,24 +43,27 @@ function Column({ columnId, column, cards, nextColumnId }) {
   // 移動卡片邏輯
   const handleMoveCardUp = (cardId, currentIndex) => {
     if (currentIndex > 0) {
-      // 往上移一格
       dispatch(moveCard(cardId, columnId, currentIndex - 1));
     }
   };
 
   const handleMoveCardDown = (cardId, currentIndex) => {
     if (currentIndex < cards.length - 1) {
-      // 往下移一格
       dispatch(moveCard(cardId, columnId, currentIndex + 1));
     }
   };
 
   const handleMoveCardToNext = (cardId) => {
     if (nextColumnId) {
-      // 移到下一欄的第 0 個位置
       dispatch(moveCard(cardId, nextColumnId, 0));
     }
   };
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: columnId,
+  });
+
+  const cardIds = cards.map((card) => card.id);
 
   return (
     <div className="w-80 bg-gray-100 rounded-lg p-4 flex-shrink-0">
@@ -97,29 +102,41 @@ function Column({ columnId, column, cards, nextColumnId }) {
         </button>
       </div>
 
-      <div className="space-y-2 mb-4">
-        {cards.map((card, index) => {
-          if (!card?.id) {
-            console.error('Card missing id:', card);
-            return null;
-          }
+      <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
+        <div
+          ref={setNodeRef}
+          className={`space-y-2 mb-4 min-h-[100px] rounded p-2 transition-colors ${
+            isOver ? 'bg-blue-50 ring-2 ring-blue-300' : ''
+          }`}
+        >
+          {cards.length === 0 && (
+            <div className="text-gray-400 text-center py-8 text-sm">
+              {isOver ? '放開以加入卡片' : '拖曳卡片到這裡'}
+            </div>
+          )}
+          {cards.map((card, index) => {
+            if (!card?.id) {
+              console.error('Card missing id:', card);
+              return null;
+            }
 
-          return (
-            <Card
-              key={card.id}
-              cardId={card.id}
-              card={card}
-              columnId={columnId}
-              canMoveUp={index > 0}
-              canMoveDown={index < cards.length - 1}
-              canMoveNext={!!nextColumnId}
-              onMoveUp={() => handleMoveCardUp(card.id, index)}
-              onMoveDown={() => handleMoveCardDown(card.id, index)}
-              onMoveNext={() => handleMoveCardToNext(card.id)}
-            />
-          );
-        })}
-      </div>
+            return (
+              <Card
+                key={card.id}
+                cardId={card.id}
+                card={card}
+                columnId={columnId}
+                canMoveUp={index > 0}
+                canMoveDown={index < cards.length - 1}
+                canMoveNext={!!nextColumnId}
+                onMoveUp={() => handleMoveCardUp(card.id, index)}
+                onMoveDown={() => handleMoveCardDown(card.id, index)}
+                onMoveNext={() => handleMoveCardToNext(card.id)}
+              />
+            );
+          })}
+        </div>
+      </SortableContext>
 
       {isAddingCard ? (
         <div className="space-y-2">

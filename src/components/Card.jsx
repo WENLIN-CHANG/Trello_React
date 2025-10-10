@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { updateCard, deleteCard } from '../reducers/actions';
 import { useBoardDispatch } from '../context/BoardContext';
 
@@ -18,6 +20,22 @@ function Card({
   const dispatch = useBoardDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(card.content);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({ id: cardId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
 
   useEffect(() => {
     setEditedContent(card.content);
@@ -62,15 +80,36 @@ function Card({
   }
 
   return (
-    <div className="bg-white p-3 rounded shadow hover:shadow-md transition-shadow group">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`bg-white p-3 rounded shadow hover:shadow-md transition-all group cursor-grab active:cursor-grabbing ${
+        isOver ? 'ring-2 ring-blue-400' : ''
+      }`}
+    >
       <p
-        className="cursor-pointer mb-2"
-        onClick={() => setIsEditing(true)}
+        className="cursor-text mb-2"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
       >
         {card.content}
       </p>
 
-      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+      <div
+        className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={() => setIsEditing(true)}
+          className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
+          title="編輯"
+        >
+          ✏️
+        </button>
         <button
           onClick={onMoveUp}
           disabled={!canMoveUp}
